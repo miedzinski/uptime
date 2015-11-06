@@ -5,7 +5,8 @@ Keep track of your daily worktime.
 ## Details ##
 
 worktime-logger allows you to see how many hours did you work in any given date range.
-For example, let's say I should work 6 hours per day and I'm curious how many time I've spent in work this month.
+
+For example, let's say I should work 6 hours per day and I'm curious how much time I've spent working this month.
 
     $ worktime show -s 01-11-2015 --hours=6
     ----------  -------
@@ -32,4 +33,5 @@ or
     $ worktime --help
 
 Make sure you run `worktime save` everytime you shutdown.
+
 This script takes assumption your uptime reflects your worktime.
