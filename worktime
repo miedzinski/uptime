@@ -1,0 +1,84 @@
+#!/usr/bin/env python3
+"""
+Keep track of your daily worktime.
+
+Usage:
+    worktime save [-d <db_file> | --database=<db_file>]
+    worktime show [-d <db_file> | --database=<db_file>]
+                  [-s <start_date> | --start=<start_date>]
+                  [-e <end_date> | --end=<end_date>]
+                  [--hours=<hours>]
+
+Options:
+    -h, --help                              Prints this message.
+    -d <db_file>, --database=<db_file>      Database path [default: ~/.worktime.db]
+    -s <start_date>, --start=<start_date>   Start date [default: 01-01-1970]
+    -e <end_date>, --end=<end_date>         End date [default: today]
+    --hours=<hours>                         Hours per day [default: 8]
+"""
+
+import datetime
+import os
+
+import dateutil.parser
+import docopt
+import peewee
+import tabulate
+
+
+database = peewee.SqliteDatabase(None)
+
+
+class Worktime(peewee.Model):
+    day = peewee.DateField(primary_key=True)
+    worktime = peewee.IntegerField(default=0)
+
+    class Meta:
+        database = database
+
+
+def save():
+    with open('/proc/uptime') as f:
+        uptime = int(float(f.readline().split()[0]))
+
+    day = datetime.date.today()
+
+    worktime = Worktime.get_or_create(day=day)[0]
+    worktime.worktime += uptime
+
+    worktime.save()
+
+
+def show(start, end, hours):
+    query = Worktime.select()\
+        .where((start <= Worktime.day) & (Worktime.day <= end))\
+        .order_by(Worktime.day)
+
+    worktimes = [(d, datetime.timedelta(seconds=s))
+                 for d, s in query.tuples()]
+
+    print(tabulate.tabulate(worktimes))
+
+    total = sum(map(lambda x: x[1], worktimes), datetime.timedelta(0))
+    expected = datetime.timedelta(seconds=query.count() * hours * 3600)
+
+    print('Total: {} (expected {})'.format(total, expected))
+
+
+if __name__ == '__main__':
+    args = docopt.docopt(__doc__)
+    db_path = os.path.expanduser(args['--database'])
+    database.init(db_path)
+    Worktime.create_table(fail_silently=True)
+
+    if args['save']:
+        save()
+    elif args['show']:
+        start = dateutil.parser.parse(args['--start']).date()
+        if args['--end'] == 'today':
+            end = datetime.date.today()
+        else:
+            end = dateutil.parser.parse(args['--end']).date()
+        hours = float(args['--hours'])
+
+        show(start, end, hours)

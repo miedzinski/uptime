@@ -1,0 +1,4 @@
+docopt==0.6.2
+peewee==2.6.4
+python-dateutil==2.4.2
+tabulate==0.7.5
