@@ -35,3 +35,7 @@ or
 Make sure you run `worktime save` everytime you shutdown.
 
 This script takes assumption your uptime reflects your worktime.
+
+## License ##
+
+worktime-logger is availible under [The MIT License](https://opensource.org/licenses/MIT), see the `LICENSE` file for more information.
