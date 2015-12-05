@@ -51,7 +51,7 @@ def save():
 
 def show(start, end, hours):
     query = Worktime.select()\
-        .where((start <= Worktime.day) & (Worktime.day <= end))\
+        .where(Worktime.day.between(start, end))\
         .order_by(Worktime.day)
 
     worktimes = [(d, datetime.timedelta(seconds=s))
